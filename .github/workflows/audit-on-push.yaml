@@ -1,14 +1,14 @@
-name: SecurityAudit
+name: Security audit
 on:
   push:
     paths:
-      - '**Cargo.toml'
-      - '**Cargo.lock'
+      - '**/Cargo.toml'
+      - '**/Cargo.lock'
 jobs:
   security_audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/@checkout@v1
+      - uses: actions/checkout@v1
       - uses: actions-rs/audit-check@v1
         with:
-          token: ${{ secret.GITHUB_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
