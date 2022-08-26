@@ -1,2 +1,2 @@
 pg:
-	SKIP_DOCKER=true ./scripts/init_pg.sh
+	SKIP_DOCKER=true ./scripts/init_db.sh
