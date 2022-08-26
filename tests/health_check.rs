@@ -1,5 +1,5 @@
+use sqlx::{Connection, PgConnection};
 use std::net::TcpListener;
-use sqlx::{PgConnection, Connection};
 use zero2prod::configuration::get_configuration;
 
 // Launch our application in the background
@@ -9,7 +9,7 @@ fn spawn_app() -> String {
     let port = listener.local_addr().unwrap().port();
     let server = zero2prod::run(listener).expect("Failed to bind address");
     let _ = tokio::spawn(server);
-    // We return the application address to the caller! 
+    // We return the application address to the caller!
     format!("http://127.0.0.1:{}", port)
 }
 
@@ -19,22 +19,24 @@ async fn health_check_works() {
     let address = spawn_app();
     let client = reqwest::Client::new();
     // Act
-    let response = client.get(&format!("{}/health_check", &address)).send()
+    let response = client
+        .get(&format!("{}/health_check", &address))
+        .send()
         .await
         .expect("Failed to execute request.");
-    // Assert 
-    assert!(response.status().is_success()); 
+    // Assert
+    assert!(response.status().is_success());
     assert_eq!(Some(0), response.content_length());
 }
 
 #[tokio::test]
-async fn subscribe_returns_a_200_ok_for_valid_data(){
+async fn subscribe_returns_a_200_ok_for_valid_data() {
     // Arrange
     let app_address = spawn_app();
     let configuration = get_configuration().expect("Failed to read configuration");
     let connection_string = configuration.database.connection_string();
     // The `Connection` trait MUST be in scope for us to invoke
-    // `PgConnection::connect` - it is not an inherent method of the struct! 
+    // `PgConnection::connect` - it is not an inherent method of the struct!
     let mut connection = PgConnection::connect(&connection_string)
         .await
         .expect("Failed to connect to Postgres.");
@@ -59,19 +61,17 @@ async fn subscribe_returns_a_200_ok_for_valid_data(){
 
     assert_eq!(saved.email, "ursula_le_guin@gmail.com");
     assert_eq!(saved.name, "le guin");
-
 }
 
-
 #[tokio::test]
-async fn subscribe_returns_a_400_when_data_is_missing(){
+async fn subscribe_returns_a_400_when_data_is_missing() {
     // Arrange
     let app_address = spawn_app();
     let client = reqwest::Client::new();
     let test_cases = vec![
         ("name=le%20guin", "missing the email"),
         ("email=ursula_le_guin%40gmail.com", "missing the name"),
-        ("", "missing both name and email")
+        ("", "missing both name and email"),
     ];
 
     for (invalid_body, error_message) in test_cases {
@@ -92,8 +92,5 @@ async fn subscribe_returns_a_400_when_data_is_missing(){
             " The API did not fail with 400 Bad Request when the payload was {}.",
             error_message
         );
-
     }
 }
-
-

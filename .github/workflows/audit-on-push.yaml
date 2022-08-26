@@ -1,4 +1,4 @@
-name: Security audit
+name: SecurityAudit
 on:
   push:
     paths:
