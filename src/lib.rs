@@ -1,5 +1,5 @@
-pub mod routes;
 pub mod configuration;
+pub mod routes;
 
 use actix_web::dev::Server;
 use actix_web::{web, App, HttpServer};
@@ -7,7 +7,6 @@ use std::net::TcpListener;
 
 use routes::health_check;
 use routes::subscribe;
-
 
 pub fn run(listener: TcpListener) -> Result<Server, std::io::Error> {
     let server = HttpServer::new(|| {
