@@ -85,7 +85,6 @@ jobs:
 
       - name: Check sqlx-data.json is up-to-date
         run: |
-          cargo sqlx prepare
           cargo sqlx prepare --check -- --bin zero2prod
 
       - name: Run cargo test
