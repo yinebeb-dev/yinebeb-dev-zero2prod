@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: ConfigMap
+metadata: 
+  name: postgres-config
+  namespace: zero2prod
+data:
+  APP_DATABASE__USERNAME: "postgres"
+  APP_DATABASE__PASSWORD: "password"
+  APP_DATABASE__PORT: "5432"
+  APP_DATABASE__DATABASE_NAME: "newsletter"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core
+  namespace: zero2prod
+  labels:
+    app: core
+spec:
+  replicas: 1
+  selector: 
+    matchLabels:
+      app: core
+  template:
+    metadata:
+      labels:
+        app: core
+    spec:
+      containers:
+        - name: zero2prod
+          image: registry:5000/zero2prod
+          envFrom:
+            - configMapRef:
+                name: postgres-config
+          env:
+            - name: APP_DATABASE__HOST
+              value: $(POSTGRES_SVC_SERVICE_HOST)
+      tolerations:
+        - key: worker
+          operator: Equal 
+          value: allow
+          effect: NoSchedule
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zero2prod-svc
+  namespace: zero2prod
+spec:
+  selector:
+    app: core
+  ports:
+    - name: http
+      port: 8000
+
